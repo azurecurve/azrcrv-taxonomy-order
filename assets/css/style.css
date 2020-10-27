@@ -1,0 +1,30 @@
+/* Gallery From Folder
+----------------------------------------------- */
+.azrcrv-gff-row {
+	display: flex;
+	flex-wrap: wrap;
+	padding: 8px 8px;
+	width: 1000px;
+	margin: auto;
+}
+
+.azrcrv-gff-row img {
+  vertical-align: middle;
+  max-height: 200px;
+}
+
+/* Responsive layout - makes a two column-layout instead of four columns */
+@media (max-width: 800px) {
+	.azrcrv-gff-column {
+		flex: 50%;
+		max-width: 50%;
+	}
+}
+
+/* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+@media (max-width: 600px) {
+	.azrcrv-gff-column {
+		flex: 100%;
+		max-width: 100%;
+	}
+}
