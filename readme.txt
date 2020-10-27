@@ -1,12 +1,12 @@
 === Taxonomy Order ===
 
 Description:	Set display order of the category and tag taxonomies of posts.
-Version:		1.0.1
+Version:		1.1.0
 Tags:			taxonomy,taxonomies
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
 Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/taxonomy-order/
-Download link:	https://github.com/azurecurve/azrcrv-taxonomy-order/releases/download/v1.0.0/azrcrv-taxonomy-order.zip
+Download link:	https://github.com/azurecurve/azrcrv-taxonomy-order/releases/download/v1.1.0/azrcrv-taxonomy-order.zip
 Donate link:	https://development.azurecurve.co.uk/support-development/
 Requires PHP:	5.6
 Requires:		1.0.0
@@ -47,8 +47,15 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 
 # Changelog
 
-### [Version 1.0.0](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/tag/v1.0.1)
+### [Version 1.1.0](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/tag/v1.1.0)
+ * Amend name of meta boxes.
+ * Retain user-defined sort order on reload.
+ * Rewrite option handling so defaults not stored in database on plugin initialisation.
+
+### [Version 1.0.1](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/tag/v1.0.1)
  * Fix incorrect download link.
+ * Fix incorrect variable name ($post_ID).
+ * Fix short PHP tag.
 
 ### [Version 1.0.0](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/tag/v1.0.0)
  * Initial release.

@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: Taxonomy Order
  * Description: Set display order of the category and tag taxonomies of posts.
- * Version: 1.0.1
+ * Version: 1.1.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/azrcrv-taxonomy-order/
@@ -36,7 +36,6 @@ require_once(dirname(__FILE__).'/libraries/updateclient/UpdateClient.class.php')
  *
  */
 // add actions
-add_action('admin_init', 'azrcrv_to_set_default_options');
 add_action('admin_menu', 'azrcrv_to_create_admin_menu');
 add_action('admin_post_azrcrv_to_save_options', 'azrcrv_to_save_options');
 add_action('plugins_loaded', 'azrcrv_to_load_languages');
@@ -62,99 +61,25 @@ function azrcrv_to_load_languages() {
 }
 
 /**
- * Set default options for plugin.
+ * Get options including defaults.
  *
- * @since 1.0.0
- *
- */
-function azrcrv_to_set_default_options($networkwide){
-	
-	$option_name = 'azrcrv-to';
-	
-	$new_options = array(
-							'enable-category-order' => 0,
-							'enable-tag-order' => 1,
-							'updated' => strtotime('2020-10-27'),
-						);
-	
-	// set defaults for multi-site
-	if (function_exists('is_multisite') && is_multisite()){
-		// check if it is a network activation - if so, run the activation function for each blog id
-		if ($networkwide){
-			global $wpdb;
-
-			$blog_ids = $wpdb->get_col("SELECT blog_id FROM $wpdb->blogs");
-			$original_blog_id = get_current_blog_id();
-
-			foreach ($blog_ids as $blog_id){
-				switch_to_blog($blog_id);
-				
-				azrcrv_to_update_options($option_name, $new_options, false);
-			}
-
-			switch_to_blog($original_blog_id);
-		}else{
-			azrcrv_to_update_options( $option_name, $new_options, false);
-		}
-		if (get_site_option($option_name) === false){
-			azrcrv_to_update_options($option_name, $new_options, true);
-		}
-	}
-	//set defaults for single site
-	else{
-		azrcrv_to_update_options($option_name, $new_options, false);
-	}
-}
-
-/**
- * Update options.
- *
- * @since 1.0.0
+ * @since 1.1.0
  *
  */
-function azrcrv_to_update_options($option_name, $new_options, $is_network_site){
-	if ($is_network_site == true){
-		if (get_site_option($option_name) === false){
-			add_site_option($option_name, $new_options);
-		}else{
-			$options = get_site_option($option_name);
-			if (!isset($options['updated']) OR $options['updated'] < $new_options['updated'] ){
-				$options['updated'] = $new_options['updated'];
-				update_site_option($option_name, azrcrv_to_update_default_options($options, $new_options));
-			}
-		}
-	}else{
-		if (get_option($option_name) === false){
-			add_option($option_name, $new_options);
-		}else{
-			$options = get_option($option_name);
-			if (!isset($options['updated']) OR $options['updated'] < $new_options['updated'] ){
-				$options['updated'] = $new_options['updated'];
-				update_option($option_name, azrcrv_to_update_default_options($options, $new_options));
-			}
-		}
-	}
-}
+function azrcrv_to_get_option($option_name){
+	
+	$defaults = array(
+						'enable-category-order' => 0,
+						'enable-tag-order' => 1,
+					);
 
-/**
- * Add default options to existing options.
- *
- * @since 1.0.0
- *
- */
-function azrcrv_to_update_default_options( &$default_options, $current_options ) {
-    $default_options = (array) $default_options;
-    $current_options = (array) $current_options;
-    $updated_options = $current_options;
-    foreach ($default_options as $key => &$value) {
-        if (is_array( $value) && isset( $updated_options[$key])){
-            $updated_options[$key] = azrcrv_to_update_default_options($value, $updated_options[$key]);
-        } else {
-			$updated_options[$key] = $value;
-        }
-    }
-    return $updated_options;
-}
+	$options = get_option($option_name, $defaults);
+
+	$options = wp_parse_args($options, $defaults);
+
+	return $options;
+
+ }
 
 /**
  * Add gallery from folder action link on plugins page.
@@ -232,7 +157,8 @@ function azrcrv_to_display_options(){
     }
 	
 	// Retrieve plugin configuration options from database
-	$options = get_option('azrcrv-to');
+	$options = azrcrv_to_get_option('azrcrv-to');
+	
 	?>
 	<div id="azrcrv-n-general" class="wrap">
 		<fieldset>
@@ -326,13 +252,13 @@ function azrcrv_to_save_options(){
  */
 function azrcrv_to_add_sidebar_metabox(){
 	
-	$options = get_option('azrcrv-to');
+	$options = azrcrv_to_get_option('azrcrv-to');
 	
 	if ($options['enable-category-order'] == 1){
-		add_meta_box('azrcrv-to-box-categories', esc_html__('Category Order', 'taxonomy-order'), 'azrcrv_to_generate_sidebar_metabox_categories', array('post'), 'side', 'default');
+		add_meta_box('azrcrv-to-box-categories', esc_html__('Category Display Order', 'taxonomy-order'), 'azrcrv_to_generate_sidebar_metabox_categories', array('post'), 'side', 'default');
 	}
 	if ($options['enable-tag-order'] == 1){
-		add_meta_box('azrcrv-to-box-tags', esc_html__('Tag Order', 'taxonomy-order'), 'azrcrv_to_generate_sidebar_metabox_tags', array('post'), 'side', 'default');
+		add_meta_box('azrcrv-to-box-tags', esc_html__('Tag Display Order', 'taxonomy-order'), 'azrcrv_to_generate_sidebar_metabox_tags', array('post'), 'side', 'default');
 	}
 }
 
@@ -344,9 +270,8 @@ function azrcrv_to_add_sidebar_metabox(){
  */
 function azrcrv_to_generate_sidebar_metabox_categories(){
 	
-	global $post;
+	global $wpdb, $post;
 	
-	$options = get_option('azrcrv-to');
 	?>
 	<p class="autopost">
 		<?php
@@ -355,18 +280,23 @@ function azrcrv_to_generate_sidebar_metabox_categories(){
 			$categories = wp_get_object_terms($post->ID, 'category', array('orderby' => 'term_order'));
 			if ($categories) {
 				echo '<table style="width: 100%; ">';
-				$category_count = 0;
 				foreach($categories as $category) {
-					$category_count++;
-					echo '<tr><td>'.$category->name.'</td><td><input name="category['.$category->term_id.']" type="number" step="1" min="0" id="sort-order" value="'.$category_count.'" class="small-text" /></td></tr>'; 
+					
+					$sql =  "select term_order FROM $wpdb->term_relationships where object_id = '%d' AND term_taxonomy_id = %d";
+					
+					$term_order = $wpdb->get_var($wpdb->prepare($sql, $post->ID, $category->term_id));
+					
+					echo '<tr><td>'.$category->name.'</td><td><input name="category['.$category->term_id.']" type="number" step="1" min="0" id="sort-order" value="'.$term_order.'" class="small-text" /></td></tr>'; 
 				}
 				echo '</table>';
+			}else{
+				_e('Please save post to enable setting display order of categories.', 'taxonomy-order');
 			}
 		?>
 		
 	</p>
 	
-<?
+<?php
 }
 
 /**
@@ -377,30 +307,33 @@ function azrcrv_to_generate_sidebar_metabox_categories(){
  */
 function azrcrv_to_generate_sidebar_metabox_tags(){
 	
-	global $post;
+	global $wpdb, $post;
 	
-	$options = get_option('azrcrv-to');
 	?>
 	<p class="autopost">
 		<?php
 			wp_nonce_field(basename(__FILE__), 'azrcrv-to-nonce');
 			
-			$post_tags = get_the_tags();
 			$tags = wp_get_object_terms($post->ID, 'post_tag', array( 'orderby' => 'name'));
 			if ($tags) {
 				echo '<table style="width: 100%; ">';
-				$tag_count = 0;
 				foreach($tags as $tag) {
-					$tag_count++;
-					echo '<tr><td>'.$tag->name.'</td><td><input name="tag['.$tag->term_id.']" type="number" step="1" min="0" id="sort-order" value="'.$tag_count.'" class="small-text" /></td></tr>'; 
+					
+					$sql =  "SELECT term_order FROM $wpdb->term_relationships where object_id = '%d' AND term_taxonomy_id = %d";
+					
+					$term_order = $wpdb->get_var($wpdb->prepare($sql, $post->ID, $tag->term_id));
+					
+					echo '<tr><td>'.$tag->name.'</td><td><input name="tag['.$tag->term_id.']" type="number" step="1" min="0" id="sort-order" value="'.$term_order.'" class="small-text" /></td></tr>'; 
 				}
 				echo '</table>';
+			}else{
+				_e('Please save post to enable setting display order of tags.', 'taxonomy-order');
 			}
 		?>
 		
 	</p>
 	
-<?
+<?php
 }
 
 /**
@@ -425,11 +358,11 @@ function azrcrv_to_save_sidebar_metabox($post_id){
 		return $post_id;
 	}
 	
-	$post_type = get_post_type( $post_ID );
+	$post_type = get_post_type( $post_id );
 	
     if ($post_type == 'post') {
 		
-		$options = get_option('azrcrv-to');
+		$options = azrcrv_to_get_option('azrcrv-to');
 		
 		//categories
 		if ($options['enable-category-order'] == 1){
@@ -497,7 +430,7 @@ function azrcrv_to_save_sidebar_metabox($post_id){
  * @return array of objects
  */
 function azrcrv_to_plugin_get_the_ordered_terms($terms, $id, $taxonomy){
-	if ('post_tag' != $taxonomy AND 'category' != $taxonomy ) // only ordering tags and categories for now but could add other taxonomies here.
+	if ('post_tag' != $taxonomy AND 'category' != $taxonomy )
 		return $terms;
 
 	$terms = wp_cache_get($id, "{$taxonomy}_relationships_sorted");
@@ -510,10 +443,11 @@ function azrcrv_to_plugin_get_the_ordered_terms($terms, $id, $taxonomy){
 }
 
 /**
- * Adds sorting by term_order to post_tag by doing a partial register replacing
- * the default
+ * Adds sorting by term_order to post_tag by doing a partial register replacing the default
+ *
+ * @since 1.0.0
+ *
  */
 function azrcrv_to_plugin_register_sorted_taxonomies(){
 	register_taxonomy('post_tag', 'post', array('sort' => true, 'args' => array('orderby' => 'term_order')));
-	//register_taxonomy('post_category', 'post', array('sort' => true, 'args' => array('orderby' => 'term_order')));
 }
