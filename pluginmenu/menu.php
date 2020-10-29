@@ -345,6 +345,13 @@ if (!function_exists('azrcrv_populate_plugin_menu_to')){
 				'retired' => 0,
 				'updated' => '2020-04-04',
 			),
+			'Snippets' => array(
+				'plugin_link' => 'azrcrv-snippets/azrcrv-snippets.php',
+				'admin_URL' => 'admin.php?page=azrcrv-s',
+				'dev_URL' => 'https://development.azurecurve.co.uk/classicpress-plugins/snippets/',
+				'retired' => 0,
+				'updated' => '2020-10-28',
+			),
 			'Tag Cloud' => array(
 				'plugin_link' => 'azrcrv-tag-cloud/azrcrv-tag-cloud.php',
 				'admin_URL' => 'admin.php?page=azrcrv-tc',
@@ -364,7 +371,7 @@ if (!function_exists('azrcrv_populate_plugin_menu_to')){
 				'admin_URL' => 'admin.php?page=azrcrv-to',
 				'dev_URL' => 'https://development.azurecurve.co.uk/classicpress-plugins/taxonomy-order/',
 				'retired' => 0,
-				'updated' => '2020-10-27',
+				'updated' => '2020-10-28',
 			),
 			'Theme Switcher' => array(
 				'plugin_link' => 'azrcrv-theme-switcher/azrcrv-theme-switcher.php',
