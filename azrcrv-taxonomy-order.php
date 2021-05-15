@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: Taxonomy Order
  * Description: Set display order of the category and tag taxonomies of posts.
- * Version: 1.2.0
+ * Version: 1.3.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/azrcrv-taxonomy-order/
@@ -95,7 +95,7 @@ function azrcrv_to_add_plugin_action_link($links, $file){
 	}
 
 	if ($file == $this_plugin){
-		$settings_link = '<a href="'.admin_url('admin.php?page=azrcrv-to').'"><img src="'.plugins_url('/pluginmenu/images/Favicon-16x16.png', __FILE__).'" style="padding-top: 2px; margin-right: -5px; height: 16px; width: 16px;" alt="azurecurve" />'.esc_html__('Settings' ,'taxonomy-order').'</a>';
+		$settings_link = '<a href="'.admin_url('admin.php?page=azrcrv-to').'"><img src="'.plugins_url('/pluginmenu/images/logo.svg', __FILE__).'" style="padding-top: 2px; margin-right: -5px; height: 16px; width: 16px;" alt="azurecurve" />'.esc_html__('Settings' ,'taxonomy-order').'</a>';
 		array_unshift($links, $settings_link);
 	}
 
@@ -162,7 +162,12 @@ function azrcrv_to_display_options(){
 	?>
 	<div id="azrcrv-n-general" class="wrap">
 		<fieldset>
-			<h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+			<h1>
+				<?php
+					echo '<a href="https://development.azurecurve.co.uk/classicpress-plugins/"><img src="'.plugins_url('/pluginmenu/images/logo.svg', __FILE__).'" style="padding-right: 6px; height: 20px; width: 20px;" alt="azurecurve" /></a>';
+					esc_html_e(get_admin_page_title());
+				?>
+			</h1>
 			<?php if(isset($_GET['settings-updated'])){ ?>
 				<div class="notice notice-success is-dismissible">
 					<p><strong><?php esc_html_e('Settings have been saved.', 'taxonomy-order'); ?></strong></p>
@@ -177,14 +182,14 @@ function azrcrv_to_display_options(){
 				<table class="form-table">
 				
 					<tr><td colspan="2">
-						<?php _e('<p>Taxonomy Order allows the display order of post categories and tags to be amended through the Edit Post page.</p>', 'taxonomy-order'); ?>
+						<?php esc_html_e('<p>Taxonomy Order allows the display order of post categories and tags to be amended through the Edit Post page.</p>', 'taxonomy-order'); ?>
 					</td></tr>
 					
 					<tr>
 						<th scope="row">
 							<label for="enable-category-order"><?php esc_html_e('Enable Category Order', 'taxonomy-order'); ?></label></th>
 						<td>
-							<label for="enable-category-order"><input name="enable-category-order" type="checkbox" id="enable-category-order" value="1" <?php checked('1', $options['enable-category-order']); ?> /><?php _e('Allow users to set display order for categories.', 'taxonomy-order'); ?></label>
+							<label for="enable-category-order"><input name="enable-category-order" type="checkbox" id="enable-category-order" value="1" <?php checked('1', $options['enable-category-order']); ?> /><?php esc_html_e('Allow users to set display order for categories.', 'taxonomy-order'); ?></label>
 						</td>
 					</tr>
 					
@@ -192,7 +197,7 @@ function azrcrv_to_display_options(){
 						<th scope="row">
 							<label for="enable-tag-order"><?php esc_html_e('Enable Tag Order', 'taxonomy-order'); ?></label></th>
 						<td>
-							<label for="enable-tag-order"><input name="enable-tag-order" type="checkbox" id="enable-tag-order" value="1" <?php checked('1', $options['enable-tag-order']); ?> /><?php _e('Allow users to set display order for tags.', 'taxonomy-order'); ?></label>
+							<label for="enable-tag-order"><input name="enable-tag-order" type="checkbox" id="enable-tag-order" value="1" <?php checked('1', $options['enable-tag-order']); ?> /><?php esc_html_e('Allow users to set display order for tags.', 'taxonomy-order'); ?></label>
 						</td>
 					</tr>
 				
