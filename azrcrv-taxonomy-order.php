@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: Taxonomy Order
  * Description: Set display order of the category and tag taxonomies of posts.
- * Version: 1.3.0
+ * Version: 1.3.1
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/azrcrv-taxonomy-order/
