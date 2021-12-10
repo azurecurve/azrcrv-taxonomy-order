@@ -5,8 +5,6 @@
 
 Set display order of the category and tag taxonomies of posts.
 
-== Installation ==
-
 # Installation Instructions
 
  * Download the latest release of the plugin from [GitHub](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/latest/).
