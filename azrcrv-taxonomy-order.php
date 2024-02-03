@@ -1,14 +1,18 @@
 <?php
 /**
  * ------------------------------------------------------------------------------
- * Plugin Name: Taxonomy Order
- * Description: Set display order of the category and tag taxonomies of posts.
- * Version: 1.3.3
- * Author: azurecurve
- * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
- * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/azrcrv-taxonomy-order/
- * Text Domain: taxonomy-order
- * Domain Path: /languages
+ * Plugin Name:		Taxonomy Order
+ * Description:		Set display order of the category and tag taxonomies of posts.
+ * Version:			1.3.4
+ * Requires CP:		1.0
+ * Author:			azurecurve
+ * Author URI:		https://development.azurecurve.co.uk/classicpress-plugins/
+ * Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/azrcrv-taxonomy-order/
+ * Donate link:		https://development.azurecurve.co.uk/support-development/
+ * Text Domain:		taxonomy-order
+ * Domain Path:		/languages
+ * License:			GPLv2 or later
+ * License URI:		http://www.gnu.org/licenses/gpl-2.0.html
  * ------------------------------------------------------------------------------
  * This is free software released under the terms of the General Public License,
  * version 2, or later. It is distributed WITHOUT ANY WARRANTY; without even the
