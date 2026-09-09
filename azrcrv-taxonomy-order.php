@@ -2,16 +2,17 @@
 /**
  * ------------------------------------------------------------------------------
  * Plugin Name:		Taxonomy Order
- * Description:		Set display order of the category and tag taxonomies of posts.
- * Version:			1.3.5
+ * Description:		Set display order of the taxonomies (categories, tags, and any
+ * 					custom taxonomy) of any public post type.
+ * Version:			2.0.0
  * Requires CP:		1.0
- * Requires PHP:	7.4
+ * Requires PHP:	8.2
  * Author:			azurecurve
  * Author URI:		https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/azrcrv-taxonomy-order/
  * Donate link:		https://development.azurecurve.co.uk/support-development/
- * Text Domain:		taxonomy-order
- * Domain Path:		/languages
+ * Text Domain:		azrcrv-to
+ * Domain Path:		/assets/languages
  * License:			GPLv2 or later
  * License URI:		http://www.gnu.org/licenses/gpl-2.0.html
  * ------------------------------------------------------------------------------
@@ -22,442 +23,122 @@
  * ------------------------------------------------------------------------------
  */
 
-// Prevent direct access.
-if (!defined('ABSPATH')){
+/**
+ * Declare the Namespace.
+ */
+namespace azurecurve\TaxonomyOrder;
+
+/**
+ * Prevent direct access.
+ */
+if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }
 
-// include plugin menu
-require_once(dirname( __FILE__).'/pluginmenu/menu.php');
-add_action('admin_init', 'azrcrv_create_plugin_menu_to');
+/**
+ * Define constants.
+ */
+const DEVELOPER_SHORTNAME = 'azurecurve';
+const DEVELOPER_NAME      = DEVELOPER_SHORTNAME . ' | Development';
+const DEVELOPER_RAW_LINK  = 'https://development.azurecurve.co.uk/classicpress-plugins/';
+const DEVELOPER_LINK      = '<a href="' . DEVELOPER_RAW_LINK . '">' . DEVELOPER_NAME . '</a>';
 
-// include update client
-require_once(dirname(__FILE__).'/libraries/updateclient/UpdateClient.class.php');
+const PLUGIN_NAME       = 'Taxonomy Order';
+const PLUGIN_SHORT_SLUG = 'taxonomy-order';
+const PLUGIN_SLUG       = 'azrcrv-' . PLUGIN_SHORT_SLUG;
+const PLUGIN_FILE       = __FILE__;
+
+// Retained literally as 'azrcrv-to' / 'azrcrv_to' - this is the same slug the
+// pre-2.0.0 plugin used for its admin page, option name, and function prefix.
+// Keeping the literal values (rather than deriving them from PLUGIN_SHORT_SLUG)
+// means upgrading from 1.3.x keeps working with zero migration for the admin
+// page URL or the saved settings row - see get_settings() in
+// functions-settings.php for the one-off migration of the *shape* of that row.
+const PLUGIN_HYPHEN     = 'azrcrv-to';
+const PLUGIN_UNDERSCORE = 'azrcrv_to';
+
+// Option names. Both are literal strings the plugin has always used (or, for
+// the second, will always use going forward) so they survive future refactors
+// of the constants above without an accidental option-name change.
+const SETTINGS_OPTION_NAME      = PLUGIN_HYPHEN;                    // 'azrcrv-to'
+const DEFAULT_ORDER_OPTION_NAME = PLUGIN_HYPHEN . '-default-order'; // 'azrcrv-to-default-order'
 
 /**
- * Setup actions, filters and shortcodes.
+ * Load the remote update client, which integrates with azurecurve's own
+ * Update Manager server so this plugin updates the same way as the rest of
+ * the azurecurve plugin family.
  *
- * @since 1.0.0
- *
+ * NOTE: per the upgrade PRD, this file is left completely untouched - it
+ * already self-registers via UpdateClient::get_instance() under this same
+ * namespace at the bottom of the file, exactly as it did before this
+ * upgrade.
  */
-// add actions
-add_action('admin_menu', 'azrcrv_to_create_admin_menu');
-add_action('admin_post_azrcrv_to_save_options', 'azrcrv_to_save_options');
-add_action('plugins_loaded', 'azrcrv_to_load_languages');
-add_action( 'init', 'azrcrv_to_plugin_register_sorted_taxonomies' );
-add_action('admin_menu', 'azrcrv_to_add_sidebar_metabox');
-add_action('save_post', 'azrcrv_to_save_sidebar_metabox', 10, 1);
-
-// add filters
-add_filter('plugin_action_links', 'azrcrv_to_add_plugin_action_link', 10, 2);
-add_filter('codepotent_update_manager_image_path', 'azrcrv_to_custom_image_path');
-add_filter('codepotent_update_manager_image_url', 'azrcrv_to_custom_image_url');
-add_filter( 'get_the_terms', 'azrcrv_to_plugin_get_the_ordered_terms' , 10, 4 );
+require_once dirname( PLUGIN_FILE ) . '/libraries/updateclient/UpdateClient.class.php';
 
 /**
- * Load language files.
- *
- * @since 1.0.0
- *
+ * Load activation/deactivation functions.
  */
-function azrcrv_to_load_languages() {
-    $plugin_rel_path = basename(dirname(__FILE__)).'/languages';
-    load_plugin_textdomain('taxonomy-order', false, $plugin_rel_path);
-}
+require_once dirname( PLUGIN_FILE ) . '/includes/functions-activation.php';
 
 /**
- * Get options including defaults.
- *
- * @since 1.1.0
- *
+ * Load discovery of eligible post types and their public taxonomies.
  */
-function azrcrv_to_get_option($option_name){
-	
-	$defaults = array(
-						'enable-category-order' => 0,
-						'enable-tag-order' => 1,
-					);
-
-	$options = get_option($option_name, $defaults);
-
-	$options = wp_parse_args($options, $defaults);
-
-	return $options;
-
- }
+require_once dirname( PLUGIN_FILE ) . '/includes/functions-post-types.php';
 
 /**
- * Add gallery from folder action link on plugins page.
- *
- * @since 1.0.0
- *
+ * Load settings (enabled post-type/taxonomy pairs, uninstall preference)
+ * functions.
  */
-function azrcrv_to_add_plugin_action_link($links, $file){
-	static $this_plugin;
-
-	if (!$this_plugin){
-		$this_plugin = plugin_basename(__FILE__);
-	}
-
-	if ($file == $this_plugin){
-		$settings_link = '<a href="'.admin_url('admin.php?page=azrcrv-to').'"><img src="'.plugins_url('/pluginmenu/images/logo.svg', __FILE__).'" style="padding-top: 2px; margin-right: -5px; height: 16px; width: 16px;" alt="azurecurve" />'.esc_html__('Settings' ,'taxonomy-order').'</a>';
-		array_unshift($links, $settings_link);
-	}
-
-	return $links;
-}
+require_once dirname( PLUGIN_FILE ) . '/includes/functions-settings.php';
 
 /**
- * Add to menu.
- *
- * @since 1.0.0
- *
+ * Load default-order (per post-type/taxonomy pair) functions.
  */
-function azrcrv_to_create_admin_menu(){
-	//global $admin_page_hooks;
-	
-	add_submenu_page("azrcrv-plugin-menu"
-						,esc_html__("Taxonomy Order Settings", "taxonomy-order")
-						,esc_html__("Taxonomy Order", "taxonomy-order")
-						,'manage_options'
-						,'azrcrv-to'
-						,'azrcrv_to_display_options');
-}
+require_once dirname( PLUGIN_FILE ) . '/includes/functions-default-order.php';
 
 /**
- * Custom plugin image path.
- *
- * @since 1.0.0
- *
+ * Load the edit-post sidebar metabox (render + save) functions.
  */
-function azrcrv_to_custom_image_path($path){
-    if (strpos($path, 'azrcrv-taxonomy-order') !== false){
-        $path = plugin_dir_path(__FILE__).'assets/pluginimages';
-    }
-    return $path;
-}
+require_once dirname( PLUGIN_FILE ) . '/includes/functions-metabox.php';
 
 /**
- * Custom plugin image url.
- *
- * @since 1.0.0
- *
+ * Load the front-end/general term-sorting filter.
  */
-function azrcrv_to_custom_image_url($url){
-    if (strpos($url, 'azrcrv-taxonomy-order') !== false){
-        $url = plugin_dir_url(__FILE__).'assets/pluginimages';
-    }
-    return $url;
-}
+require_once dirname( PLUGIN_FILE ) . '/includes/functions-sorting.php';
 
 /**
- * Display Settings page.
- *
- * @since 1.0.0
- *
+ * Load admin menu functions.
  */
-function azrcrv_to_display_options(){
-	if (!current_user_can('manage_options')){
-        wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'taxonomy-order'));
-    }
-	
-	// Retrieve plugin configuration options from database
-	$options = azrcrv_to_get_option('azrcrv-to');
-	
-	?>
-	<div id="azrcrv-n-general" class="wrap">
-		<fieldset>
-			<h1>
-				<?php
-					echo '<a href="https://development.azurecurve.co.uk/classicpress-plugins/"><img src="'.plugins_url('/pluginmenu/images/logo.svg', __FILE__).'" style="padding-right: 6px; height: 20px; width: 20px;" alt="azurecurve" /></a>';
-					esc_html_e(get_admin_page_title());
-				?>
-			</h1>
-			<?php if(isset($_GET['settings-updated'])){ ?>
-				<div class="notice notice-success is-dismissible">
-					<p><strong><?php esc_html_e('Settings have been saved.', 'taxonomy-order'); ?></strong></p>
-				</div>
-			<?php } ?>
-			<form method="post" action="admin-post.php">
-				<input type="hidden" name="action" value="azrcrv_to_save_options" />
-				<input name="page_options" type="hidden" value="copyright" />
-				
-				<!-- Adding security through hidden referrer field -->
-				<?php wp_nonce_field('azrcrv-to', 'azrcrv-to-nonce'); ?>
-				<table class="form-table">
-				
-					<tr><td colspan="2">
-						<?php esc_html_e('<p>Taxonomy Order allows the display order of post categories and tags to be amended through the Edit Post page.</p>', 'taxonomy-order'); ?>
-					</td></tr>
-					
-					<tr>
-						<th scope="row">
-							<label for="enable-category-order"><?php esc_html_e('Enable Category Order', 'taxonomy-order'); ?></label></th>
-						<td>
-							<label for="enable-category-order"><input name="enable-category-order" type="checkbox" id="enable-category-order" value="1" <?php checked('1', $options['enable-category-order']); ?> /><?php esc_html_e('Allow users to set display order for categories.', 'taxonomy-order'); ?></label>
-						</td>
-					</tr>
-					
-					<tr>
-						<th scope="row">
-							<label for="enable-tag-order"><?php esc_html_e('Enable Tag Order', 'taxonomy-order'); ?></label></th>
-						<td>
-							<label for="enable-tag-order"><input name="enable-tag-order" type="checkbox" id="enable-tag-order" value="1" <?php checked('1', $options['enable-tag-order']); ?> /><?php esc_html_e('Allow users to set display order for tags.', 'taxonomy-order'); ?></label>
-						</td>
-					</tr>
-				
-				</table>
-				<input type="submit" value="Save Changes" class="button-primary"/>
-			</form>
-		</fieldset>
-	</div>
-	<?php
-}
+require_once dirname( PLUGIN_FILE ) . '/includes/functions-menu.php';
 
 /**
- * Save settings.
- *
- * @since 1.0.0
- *
+ * Load custom plugin icon/banner path functions, used by Update Manager.
  */
-function azrcrv_to_save_options(){
-	// Check that user has proper security level
-	if (!current_user_can('manage_options')){
-		wp_die(esc_html__('You do not have permissions to perform this action', 'taxonomy-order'));
-	}
-	// Check that nonce field created in configuration form is present
-	if (! empty($_POST) && check_admin_referer('azrcrv-to', 'azrcrv-to-nonce')){
-	
-		// Retrieve original plugin options array
-		$options = get_option('azrcrv-to');
-		
-		$option_name = 'enable-category-order';
-		if (isset($_POST[$option_name])){
-			$options[$option_name] = 1;
-		}else{
-			$options[$option_name] = 0;
-		}
-		
-		$option_name = 'enable-tag-order';
-		if (isset($_POST[$option_name])){
-			$options[$option_name] = 1;
-		}else{
-			$options[$option_name] = 0;
-		}
-		
-		// Store updated options array to database
-		update_option('azrcrv-to', $options);
-		
-		// Redirect the page to the configuration form that was processed
-		wp_redirect(add_query_arg('page', 'azrcrv-to&settings-updated', admin_url('admin.php')));
-		exit;
-	}
-}
+require_once dirname( PLUGIN_FILE ) . '/includes/functions-plugin-images.php';
 
 /**
- * Add post metabox to sidebar for tags.
- *
- * @since 1.0.0
- *
+ * Load the shared azurecurve cross-plugin menu: populates this plugin's
+ * entry into the shared directory of azurecurve plugins, and (if not
+ * already added by another azurecurve plugin on this site) registers the
+ * shared top-level "azurecurve" admin menu page that lists them all. This
+ * plugin is reachable only via that shared menu, not its own top-level
+ * ClassicPress admin menu page.
  */
-function azrcrv_to_add_sidebar_metabox(){
-	
-	$options = azrcrv_to_get_option('azrcrv-to');
-	
-	if ($options['enable-category-order'] == 1){
-		add_meta_box('azrcrv-to-box-categories', esc_html__('Category Display Order', 'taxonomy-order'), 'azrcrv_to_generate_sidebar_metabox_categories', array('post'), 'side', 'default');
-	}
-	if ($options['enable-tag-order'] == 1){
-		add_meta_box('azrcrv-to-box-tags', esc_html__('Tag Display Order', 'taxonomy-order'), 'azrcrv_to_generate_sidebar_metabox_tags', array('post'), 'side', 'default');
-	}
-}
+require_once dirname( PLUGIN_FILE ) . '/includes/azurecurve-menu-populate.php';
+require_once dirname( PLUGIN_FILE ) . '/includes/azurecurve-menu-display.php';
 
 /**
- * Generate post sidebar metabox for categories.
- *
- * @since 1.0.0
- *
+ * Load admin script/style enqueue functions.
  */
-function azrcrv_to_generate_sidebar_metabox_categories(){
-	
-	global $wpdb, $post;
-	
-	?>
-	<p class="autopost">
-		<?php
-			wp_nonce_field(basename(__FILE__), 'azrcrv-to-nonce');
-			
-			$categories = wp_get_object_terms($post->ID, 'category', array('orderby' => 'term_order'));
-			if ($categories) {
-				echo '<table style="width: 100%; ">';
-				foreach($categories as $category) {
-					
-					$sql =  "select term_order FROM $wpdb->term_relationships where object_id = '%d' AND term_taxonomy_id = %d";
-					
-					$term_order = $wpdb->get_var($wpdb->prepare($sql, $post->ID, $category->term_id));
-					
-					echo '<tr><td>'.$category->name.'</td><td><input name="category['.$category->term_id.']" type="number" step="1" min="0" id="sort-order" value="'.$term_order.'" class="small-text" /></td></tr>'; 
-				}
-				echo '</table>';
-			}else{
-				_e('Please save post to enable setting display order of categories.', 'taxonomy-order');
-			}
-		?>
-		
-	</p>
-	
-<?php
-}
+require_once dirname( PLUGIN_FILE ) . '/includes/functions-scripts.php';
 
 /**
- * Generate post sidebar metabox for tags.
- *
- * @since 1.0.0
- *
+ * Load language functions.
  */
-function azrcrv_to_generate_sidebar_metabox_tags(){
-	
-	global $wpdb, $post;
-	
-	?>
-	<p class="autopost">
-		<?php
-			wp_nonce_field(basename(__FILE__), 'azrcrv-to-nonce');
-			
-			$tags = wp_get_object_terms($post->ID, 'post_tag', array( 'orderby' => 'name'));
-			if ($tags) {
-				echo '<table style="width: 100%; ">';
-				foreach($tags as $tag) {
-					
-					$sql =  "SELECT term_order FROM $wpdb->term_relationships where object_id = '%d' AND term_taxonomy_id = %d";
-					
-					$term_order = $wpdb->get_var($wpdb->prepare($sql, $post->ID, $tag->term_id));
-					
-					echo '<tr><td>'.$tag->name.'</td><td><input name="tag['.$tag->term_id.']" type="number" step="1" min="0" id="sort-order" value="'.$term_order.'" class="small-text" /></td></tr>'; 
-				}
-				echo '</table>';
-			}else{
-				_e('Please save post to enable setting display order of tags.', 'taxonomy-order');
-			}
-		?>
-		
-	</p>
-	
-<?php
-}
+require_once dirname( PLUGIN_FILE ) . '/includes/functions-language.php';
 
 /**
- * Save sidebar metabox of category and tag order.
- *
- * @since 1.0.0
- *
+ * Load setup of activation/deactivation hooks, actions and filters. This is
+ * required last, since it references functions declared in the files above.
  */
-function azrcrv_to_save_sidebar_metabox($post_id){
-	
-	global $wpdb;
-	
-	if(! isset($_POST[ 'azrcrv-to-nonce' ]) || ! wp_verify_nonce($_POST[ 'azrcrv-to-nonce' ], basename(__FILE__))){
-		return $post_id;
-	}
-	
-	if(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE){
-		return $post_id;
-	}
-	
-	if(! current_user_can('edit_post', $post_id)){
-		return $post_id;
-	}
-	
-	$post_type = get_post_type( $post_id );
-	
-    if ($post_type == 'post') {
-		
-		$options = azrcrv_to_get_option('azrcrv-to');
-		
-		//categories
-		if ($options['enable-category-order'] == 1){
-			$option_name = 'category';
-			if (isset($_POST[$option_name])){
-				$table_name = $wpdb->prefix.'term_relationships';
-				foreach ($_POST[$option_name] as $key => $value){
-					$wpdb->update(
-						$table_name
-						,array(
-							'term_order' => $value,
-						)
-						,array(
-							'object_id' => $post_id,
-							'term_taxonomy_id' => $key,
-						)
-						,array(
-							'%d',
-						)
-						,array(
-							'%d',
-						)
-					);
-				}
-			}
-		}
-		//tags
-		if ($options['enable-tag-order'] == 1){
-			$option_name = 'tag';
-			if (isset($_POST[$option_name])){
-				$table_name = $wpdb->prefix.'term_relationships';
-				foreach ($_POST[$option_name] as $key => $value){
-					$wpdb->update(
-						$table_name
-						,array(
-							'term_order' => $value,
-						)
-						,array(
-							'object_id' => $post_id,
-							'term_taxonomy_id' => $key,
-						)
-						,array(
-							'%d',
-						)
-						,array(
-							'%d',
-						)
-					);
-				}
-			}
-		}
-	}
-	
-	return esc_attr($_POST[ 'autopost' ]);
-}
-
-/**
- * Sort post_tags by term_order
- *
- * @since 1.0.0
- *
- * @param array $terms array of objects to be replaced with sorted list
- * @param integer $id post id
- * @param string $taxonomy only 'post_tag' is changed.
- * @return array of objects
- */
-function azrcrv_to_plugin_get_the_ordered_terms($terms, $id, $taxonomy){
-	if ('post_tag' != $taxonomy AND 'category' != $taxonomy )
-		return $terms;
-
-	$terms = wp_cache_get($id, "{$taxonomy}_relationships_sorted");
-	if ( false === $terms ) {
-		$terms = wp_get_object_terms($id, $taxonomy, array( 'orderby' => 'term_order'));
-		wp_cache_add($id, $terms, $taxonomy . '_relationships_sorted');
-	}
-
-	return $terms;
-}
-
-/**
- * Adds sorting by term_order to post_tag by doing a partial register replacing the default
- *
- * @since 1.0.0
- *
- */
-function azrcrv_to_plugin_register_sorted_taxonomies(){
-	register_taxonomy('post_tag', 'post', array('sort' => true, 'args' => array('orderby' => 'term_order')));
-}
+require_once dirname( PLUGIN_FILE ) . '/includes/setup.php';

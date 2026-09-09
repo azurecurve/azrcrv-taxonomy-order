@@ -1,0 +1,86 @@
+.azrcrv-to-wrap .form-table th {
+	width: 220px;
+}
+
+.azrcrv-to-settings label {
+	display: block;
+	margin-bottom: 6px;
+}
+
+.azrcrv-to-pair-checkbox {
+	margin-right: 16px;
+}
+
+/**
+ * Sortable list - used both by the edit-post order metabox(es) and by the
+ * Default Order tab's term-order editor. Vanilla JS in sortable-list.js
+ * drives the actual reordering; this file only styles it.
+ */
+.azrcrv-to-sortable-list {
+	margin: 0 0 8px;
+	padding: 0;
+	list-style: none;
+	max-width: 480px;
+}
+
+.azrcrv-to-sortable-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 8px;
+	margin-bottom: 4px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 3px;
+	cursor: grab;
+	/* Without this, starting the mouse-down on the term name's text can
+	   begin a text selection instead of a native drag, especially in
+	   Firefox - which means dragstart never fires and the item never
+	   actually moves. */
+	user-select: none;
+	-webkit-user-select: none;
+	-webkit-user-drag: element;
+}
+
+.azrcrv-to-sortable-item.azrcrv-to-dragging {
+	opacity: 0.5;
+}
+
+.azrcrv-to-sortable-item.azrcrv-to-drag-over {
+	border-top: 2px solid #2271b1;
+}
+
+.azrcrv-to-drag-handle {
+	color: #787c82;
+	flex: 0 0 auto;
+}
+
+.azrcrv-to-term-name {
+	flex: 1 1 auto;
+	word-break: break-word;
+}
+
+.azrcrv-to-move-buttons {
+	flex: 0 0 auto;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.azrcrv-to-move-buttons button {
+	background: none;
+	border: 1px solid #dcdcde;
+	border-radius: 2px;
+	cursor: pointer;
+	line-height: 1;
+	padding: 1px 5px;
+}
+
+.azrcrv-to-move-buttons button:hover {
+	background: #f0f0f1;
+}
+
+.azrcrv-to-move-buttons button:focus-visible {
+	outline: 2px solid #2271b1;
+	outline-offset: 1px;
+}

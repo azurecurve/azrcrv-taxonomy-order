@@ -1,18 +1,104 @@
 # [Taxonomy Order](https://development.azurecurve.co.uk/classicpress-plugins/taxonomy-order/)
-![Plugin Banner](/assets/pluginimages/banner-1544x500.png)
+![Plugin Banner](/assets/images/banner-1544x500.png)
 
-# Description
+Set display order of any taxonomy attached to any public post type.
 
-Set display order of the category and tag taxonomies of posts.
+## Description
 
-# Installation Instructions
+Set display order of any taxonomy (categories, tags, or a custom taxonomy) attached to any public post type, with a per post type/taxonomy default order available as a fallback.
 
- * Download the latest release of the plugin from [GitHub](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/latest/).
- * Upload the entire zip file using the Plugins upload function in your ClassicPress admin panel.
- * Activate the plugin.
- * Configure relevant settings via the settings page in the admin control panel (azurecurve menu).
+## Installation
 
-# About azurecurve
+* Download the latest release of the plugin from [GitHub](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/latest/).
+* Upload the entire zip file using the Plugins upload function in your ClassicPress admin panel.
+* Activate the plugin.
+* Configure relevant settings via the settings page in the admin control panel (azurecurve menu).
+
+## Frequently Asked Questions
+
+### Can I translate this plugin?
+Yes, the .pot file is in the plugins languages folder; if you do translate this plugin, please sent the .po and .mo files to translations@azurecurve.co.uk for inclusion in the next version (full credit will be given).
+
+### Is this plugin compatible with both WordPress and ClassicPress?
+This plugin is developed for ClassicPress, but will likely work on WordPress.
+
+## Changelog
+
+### [Version 2.0.0](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/tag/v2.0.0)
+
+* Rewrite plugin on azurecurve's current plugin architecture (namespaced, modular includes, admin-post based settings, tabbed admin UI).
+* Extend from posts only to any public post type with a registered public taxonomy - each post type/taxonomy pair is enabled individually on the Settings tab.
+* Add a Default Order tab: set a default term order per enabled post type/taxonomy pair, used to seed new posts and as the site-wide fallback order until a post is individually reordered.
+* Replace the numeric order-input fields with a drag-and-drop reorderable list (vanilla JS, no jQuery/jQuery UI), with keyboard-operable up/down buttons as an accessible fallback.
+* Add an uninstall option to also reset term order data for pairs that were enabled (off by default).
+* Fix: saving settings on a fresh install could produce a PHP warning.
+* Fix: HTML markup was being escaped as plain text on the settings page instead of being rendered.
+* Fix: duplicate HTML element IDs in the order metabox.
+* Fix: the term-order cache was never invalidated after saving a new order, so a freshly-reordered post could keep showing a stale order.
+* Fix: an undefined array key was read on every single post save site-wide, regardless of post type, producing a PHP notice.
+* Fix: term names were not escaped when output in the order metabox.
+* Fix: replaced a call to the deprecated wp_get_object_terms() function.
+* Fix: duplicate nonce field names when more than one order metabox was present on the same screen.
+* Update readme.md and remove readme.txt (not required for ClassicPress).
+* Update azurecurve menu.
+
+### [Version 1.3.5](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/tag/v1.3.5)
+
+* Update plugin header for compatibility with ClasssicPress v2.
+
+### [Version 1.3.4](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/tag/v1.3.4)
+
+* Update plugin header and readme for compatibility with ClassicPress Directory v2.
+* Update Update Manager to version 2.5.0.
+
+### [Version 1.3.3](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/tag/v1.3.3)
+
+* Update readme file for compatibility with ClassicPress Directory.
+
+### [Version 1.3.2](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/tag/v1.3.2)
+
+* Update readme files.
+* Update language template.
+* Fix bug with azurecurve menu.
+
+### [Version 1.3.1](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/tag/v1.3.1)
+
+* Update azurecurve menu.
+* Update readme files.
+
+### [Version 1.3.0](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/tag/v1.3.0)
+
+* Add uninstall.
+* Update translations to escape strings.
+* Update azurecurve menu and logo.
+
+### [Version 1.2.0](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/tag/v1.2.0)
+
+* Update azurecurve plugin menu.
+
+### [Version 1.1.1](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/tag/v1.1.1)
+
+* Fix plugin action link to use admin_url() function.
+
+### [Version 1.1.0](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/tag/v1.1.0)
+
+* Amend name of meta boxes.
+* Retain user-defined sort order on reload.
+* Rewrite option handling so defaults not stored in database on plugin initialisation.
+
+### [Version 1.0.1](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/tag/v1.0.1)
+
+* Fix incorrect Download link.
+* Fix incorrect variable name ($post_ID).
+* Fix short PHP tag.
+
+### [Version 1.0.0](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/tag/v1.0.0)
+
+* Initial release.
+
+## Other Notes
+
+### About azurecurve
 
 **azurecurve** was one of the first plugin developers to start developing for Classicpress; all plugins are available from [azurecurve Development](https://development.azurecurve.co.uk/) and are integrated with the [Update Manager plugin](https://directory.classicpress.net/plugins/update-manager) for fully integrated, no hassle, updates.
 
@@ -47,6 +133,7 @@ The other plugins available from **azurecurve** are:
  * Nearby - [details](https://development.azurecurve.co.uk/classicpress-plugins/nearby/) / [download](https://github.com/azurecurve/azrcrv-nearby/releases/latest/)
  * Page Index - [details](https://development.azurecurve.co.uk/classicpress-plugins/page-index/) / [download](https://github.com/azurecurve/azrcrv-page-index/releases/latest/)
  * Post Archive - [details](https://development.azurecurve.co.uk/classicpress-plugins/post-archive/) / [download](https://github.com/azurecurve/azrcrv-post-archive/releases/latest/)
+* Quiz Engine - [details](https://development.azurecurve.co.uk/classicpress-plugins/quiz-engine/) / [download](https://github.com/azurecurve/azrcrv-quiz-engine/releases/latest/)
  * Redirect - [details](https://development.azurecurve.co.uk/classicpress-plugins/redirect/) / [download](https://github.com/azurecurve/azrcrv-redirect/releases/latest/)
  * Remove Revisions - [details](https://development.azurecurve.co.uk/classicpress-plugins/remove-revisions/) / [download](https://github.com/azurecurve/azrcrv-remove-revisions/releases/latest/)
  * RSS Feed - [details](https://development.azurecurve.co.uk/classicpress-plugins/rss-feed/) / [download](https://github.com/azurecurve/azrcrv-rss-feed/releases/latest/)
@@ -62,6 +149,7 @@ The other plugins available from **azurecurve** are:
  * Taxonomy Index - [details](https://development.azurecurve.co.uk/classicpress-plugins/taxonomy-index/) / [download](https://github.com/azurecurve/azrcrv-taxonomy-index/releases/latest/)
  * Taxonomy Order - [details](https://development.azurecurve.co.uk/classicpress-plugins/taxonomy-order/) / [download](https://github.com/azurecurve/azrcrv-taxonomy-order/releases/latest/)
  * Theme Switcher - [details](https://development.azurecurve.co.uk/classicpress-plugins/theme-switcher/) / [download](https://github.com/azurecurve/azrcrv-theme-switcher/releases/latest/)
+* Timelines - [details](https://development.azurecurve.co.uk/classicpress-plugins/timelines) / [download](https://github.com/azurecurve/azrcrv-timelines/releases/latest/)
  * Timelines - [details](https://development.azurecurve.co.uk/classicpress-plugins/timelines/) / [download](https://github.com/azurecurve/azrcrv-timelines/releases/latest/)
  * Toggle Show/Hide - [details](https://development.azurecurve.co.uk/classicpress-plugins/toggle-showhide/) / [download](https://github.com/azurecurve/azrcrv-toggle-showhide/releases/latest/)
  * Update Admin Menu - [details](https://development.azurecurve.co.uk/classicpress-plugins/update-admin-menu/) / [download](https://github.com/azurecurve/azrcrv-update-admin-menu/releases/latest/)
